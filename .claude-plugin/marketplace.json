@@ -1,0 +1,16 @@
+{
+  "name": "pstack-skills",
+  "owner": {
+    "name": "ketiyohannes"
+  },
+  "metadata": {
+    "description": "ketiyohannes's personal pstack skills for Claude Code and Cursor."
+  },
+  "plugins": [
+    {
+      "name": "pstack",
+      "source": "./",
+      "description": "Personal copy of pstack: rigorous agent workflows, playbooks, and principles from cursor/plugins."
+    }
+  ]
+}
