@@ -1,13 +1,13 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "pstack",
-  "version": "0.15.36",
-  "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
+  "version": "0.15.36-claude.1",
+  "description": "poteto's pstack, adapted to run on Claude Code workflows. if you want to go fast, go deep first.",
   "author": {
     "name": "Lauren Tan"
   },
-  "homepage": "https://github.com/cursor/plugins/tree/main/pstack",
-  "repository": "https://github.com/cursor/plugins",
+  "homepage": "https://github.com/ketiyohannes/pstack-skills",
+  "repository": "https://github.com/ketiyohannes/pstack-skills",
   "license": "MIT",
   "keywords": [
     "pstack",

@@ -12,6 +12,24 @@ pstack skills use Cursor names. In Claude Code, read this file once per session,
 | Run another pstack skill (`/name` or "the **name** skill") | `Read` `<pstack>/skills/<name>/SKILL.md` and follow it. The `Skill` tool refuses most pstack skills. When you tell the user to type it, write `/pstack:<name>`. |
 | `Grep`, `Glob` | `Bash` with `rg` when the session has no `Grep` or `Glob`. |
 
+## Workflows
+
+Six skills run their fan-out as Claude Code workflows from this plugin's `workflows/` folder. Each of those skills has an `In Claude Code` section that names its workflow and its `args`. The skill still owns the steps that need judgment, such as framing, picking a base, grafting, and asking for approval. The workflow owns the parallel spawns, the retries, and the checks.
+
+| Skill | Workflow | What the workflow runs |
+| --- | --- | --- |
+| `arena` | `pstack:arena` | Phases B and C. Candidates in their own worktrees, then a blinded cross-judge. |
+| `swarm` | `pstack:swarm` | Phases B and C. Workers over slices or race arms, one respawn for an incomplete record, and the race selection. |
+| `interrogate` | `pstack:interrogate` | Fan out and Verify. Adversaries in their own worktrees, then a verifier re-runs each finding. |
+| `how` | `pstack:how` | Steps 2 and 3. Read-only explorers per angle, then one explainer. |
+| `why` | `pstack:why` | Steps 3 and 4. One investigator per evidence source, then one synthesizer. |
+| `reflect` | `pstack:reflect` | Steps 2 and 3. Three reviewer lenses, then one synthesizer. |
+
+- A pstack skill that the user invoked, directly or through `poteto-mode`, and that names a workflow is the user's request to run that workflow. Call `Workflow` with the named workflow. Don't ask again.
+- Other skills that point at these phases, such as the Eval playbook's arena steps or Autopilot's swarm verification, run them through the same workflow.
+- Workflow agents take `model` values `opus`, `sonnet`, `haiku`, and `fable`, and `effort` values `low` to `max`. Every agent is a Claude model, so a step that asks for another model family uses a different Claude model and says so.
+- When the session has no `Workflow` tool, follow the skill's Cursor steps with the tables below.
+
 ## Subagent fields
 
 | Cursor | Claude Code |

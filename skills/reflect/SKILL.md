@@ -8,6 +8,17 @@ disable-model-invocation: true
 
 In Claude Code, read [the Claude Code adapter](../../docs/harness/claude-code.md) once per session before you follow this skill. It maps the Cursor names in pstack skills to Claude Code.
 
+## In Claude Code
+
+Run steps 2 and 3 as the `pstack:reflect` workflow. Do step 1 yourself. The transcript lives at `~/.claude/projects/<slug>/<session>.jsonl` per the adapter's Paths table. Then call `Workflow` with `name: "pstack:reflect"` and these `args`:
+
+- `pstackRoot`, plus `transcriptPath` or, when no file matches, `digest`.
+- `models.judgment` from the `reflect judgment, divergent, synthesizer` line, and `models.tooling` from the `reflect tooling` line.
+
+`pstackRoot` is the absolute path of the folder that holds `skills/`, two levels up from this file. Take each model from its role line in `~/.claude/rules/pstack-models.md` as `{model, effort}`, for example `opus xhigh` as `{"model": "opus", "effort": "xhigh"}`. Leave a role out when its line is missing, and the workflow uses its default. Write `inherit-parent` or `auto` as `{"model": "inherit"}`. A Cursor-only slug such as `grok-*` has no Claude Code model, so leave that role out too. Workflow subagents are all Claude models, so a cross-family check becomes a cross-model check. Say so in the output. If the session has no `Workflow` tool, follow the Cursor steps below with the adapter.
+
+The workflow returns the synthesizer's Accepted, Rejected, and Backlog list as `synthesis`. Then run steps 4 to 6 yourself. Applying edits still waits for the user's approval.
+
 Mine the current conversation for durable learnings, then route them into skill edits.
 
 Invoke when the user says "reflect" or "/reflect". Skip when the conversation is trivial, off-topic, or already covered by an existing skill the parent followed correctly. One-offs are not learnings.

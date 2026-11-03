@@ -8,6 +8,19 @@ disable-model-invocation: true
 
 In Claude Code, read [the Claude Code adapter](../../docs/harness/claude-code.md) once per session before you follow this skill. It maps the Cursor names in pstack skills to Claude Code.
 
+## In Claude Code
+
+Run Phases B and C as the `pstack:arena` workflow. Do Phase A yourself, then call `Workflow` with `name: "pstack:arena"` and these `args`:
+
+- `pstackRoot`, `slug`, `task` (the verbatim prompt every candidate gets), `artifact`, and `rubric` (3 to 6 criteria).
+- `grounding`, the shared grounding file's path, when there is one.
+- `writesCode`. `true` (the default) runs each candidate in its own git worktree on branch `arena/<slug>/candidate-<label>`. `false` writes under `scratchDir`, which is then required.
+- `runners` from the `arena runners` line, and `judge` from the `arena cross-judge pool` line. Pick a judge model that differs from the parent's.
+
+`pstackRoot` is the absolute path of the folder that holds `skills/`, two levels up from this file. Take each model from its role line in `~/.claude/rules/pstack-models.md` as `{model, effort}`, for example `opus xhigh` as `{"model": "opus", "effort": "xhigh"}`. Leave a role out when its line is missing, and the workflow uses its default. Write `inherit-parent` or `auto` as `{"model": "inherit"}`. A Cursor-only slug such as `grok-*` has no Claude Code model, so leave that role out too. Workflow subagents are all Claude models, so a cross-family check becomes a cross-model check. Say so in the output. If the session has no `Workflow` tool, follow the Cursor steps below with the adapter.
+
+The workflow returns `candidates` (label, runner, location, branch, commit, rationale), `dropouts`, and the blinded `judge` scores. Then run Phases D, E, and F yourself on those locations.
+
 Open a todolist with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything.
 
 ## Phase A: Frame

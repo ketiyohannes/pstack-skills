@@ -8,6 +8,19 @@ disable-model-invocation: true
 
 In Claude Code, read [the Claude Code adapter](../../docs/harness/claude-code.md) once per session before you follow this skill. It maps the Cursor names in pstack skills to Claude Code.
 
+## In Claude Code
+
+Run steps 2 and 3 as the `pstack:how` workflow. Do step 1 yourself, then call `Workflow` with `name: "pstack:how"` and these `args`:
+
+- `pstackRoot`, `question`, and `complexity` (`simple` or `complex`).
+- `angles`, 2 to 4 slices. Required when `complex`.
+- `context`, a short note from the conversation, when it helps.
+- `models.explorer` from the `how explorer` line, and `models.explainer` from the `how explainer` line.
+
+`pstackRoot` is the absolute path of the folder that holds `skills/`, two levels up from this file. Take each model from its role line in `~/.claude/rules/pstack-models.md` as `{model, effort}`, for example `opus xhigh` as `{"model": "opus", "effort": "xhigh"}`. Leave a role out when its line is missing, and the workflow uses its default. Write `inherit-parent` or `auto` as `{"model": "inherit"}`. A Cursor-only slug such as `grok-*` has no Claude Code model, so leave that role out too. Workflow subagents are all Claude models, so a cross-family check becomes a cross-model check. Say so in the output. If the session has no `Workflow` tool, follow the Cursor steps below with the adapter.
+
+Explorers and the explainer run as read-only `Explore` agents. Present the returned `explanation` per step 4.
+
 Explore the codebase to answer "how does X work?" questions. Produce architectural explanations at the level of a senior engineer onboarding onto a subsystem, enough to build a working mental model, not so much that it reads like annotated source code.
 
 Every spawn is a Task subagent with `subagent_type: generalPurpose` and `readonly: true`. Explorers use the `how explorer` line in the `pstack-models.mdc` rule (default `grok-4.7-xhigh-fast`), and every explainer uses the `how explainer` line (default `claude-opus-5-5-xhigh`). Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.

@@ -8,6 +8,20 @@ disable-model-invocation: true
 
 In Claude Code, read [the Claude Code adapter](../../docs/harness/claude-code.md) once per session before you follow this skill. It maps the Cursor names in pstack skills to Claude Code.
 
+## In Claude Code
+
+Run Steps 3 and 4 as the `pstack:why` workflow. Do Steps 1 and 2 and the Discovery step yourself. Discover the session's MCP servers from the tools you can see, or with `ToolSearch`. Then call `Workflow` with `name: "pstack:why"` and these `args`:
+
+- `pstackRoot` and `question`.
+- `anchor`, the code anchor from Step 2: `{files, symbols, commits, prs, tickets, notes}`.
+- `investigators`, one `{category, source, playbook, incident}` per category with a matching source. It must include `source control` through `git` and `gh`. `playbook` is the path of a file under `references/sources/` when one fits. `incident` is `true` when the target looks defensive.
+- `skipped`, one `{category, reason}` per skipped category.
+- `models.investigator` from the `why investigators` line, and `models.synthesizer` from its role line.
+
+`pstackRoot` is the absolute path of the folder that holds `skills/`, two levels up from this file. Take each model from its role line in `~/.claude/rules/pstack-models.md` as `{model, effort}`, for example `opus xhigh` as `{"model": "opus", "effort": "xhigh"}`. Leave a role out when its line is missing, and the workflow uses its default. Write `inherit-parent` or `auto` as `{"model": "inherit"}`. A Cursor-only slug such as `grok-*` has no Claude Code model, so leave that role out too. Workflow subagents are all Claude models, so a cross-family check becomes a cross-model check. Say so in the output. If the session has no `Workflow` tool, follow the Cursor steps below with the adapter.
+
+Investigators run as general-purpose agents so they keep MCP access. Present the returned `answer` per Step 5.
+
 Investigate the motivation and intent behind code. The companion `how` skill answers what the code does and how it works. `why` answers what forces led to its shape.
 
 Each spawn below names a role line in the `pstack-models.mdc` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.

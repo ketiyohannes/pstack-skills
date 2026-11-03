@@ -8,6 +8,18 @@ disable-model-invocation: true
 
 In Claude Code, read [the Claude Code adapter](../../docs/harness/claude-code.md) once per session before you follow this skill. It maps the Cursor names in pstack skills to Claude Code.
 
+## In Claude Code
+
+Run Fan out and Verify as the `pstack:interrogate` workflow. Do Frame yourself. Save the scope's uncommitted changes with `git diff --binary --output=/tmp/pstack-interrogate-<slug>.patch HEAD`, and confirm the file is a real patch with `git apply --check -R <that path>`. Write it with `--output`, not a shell redirect, because a shell hook that rewrites `git` output can corrupt a redirected diff. Then call `Workflow` with `name: "pstack:interrogate"` and these `args`:
+
+- `scope` and `intent` (the restatement).
+- `patchPath`, the saved diff. Leave it out when the scope is already committed. Use `ref` when adversaries must check out a branch or SHA.
+- `adversaries` from the `interrogate reviewers` line, and `verifier` from the `swarm workers` line.
+
+`pstackRoot` is the absolute path of the folder that holds `skills/`, two levels up from this file. Take each model from its role line in `~/.claude/rules/pstack-models.md` as `{model, effort}`, for example `opus xhigh` as `{"model": "opus", "effort": "xhigh"}`. Leave a role out when its line is missing, and the workflow uses its default. Write `inherit-parent` or `auto` as `{"model": "inherit"}`. A Cursor-only slug such as `grok-*` has no Claude Code model, so leave that role out too. Workflow subagents are all Claude models, so a cross-family check becomes a cross-model check. Say so in the output. If the session has no `Workflow` tool, follow the Cursor steps below with the adapter.
+
+Each adversary works in its own worktree and returns every repro file with its finding. A separate verifier re-runs each finding in a fresh worktree with the same setup, and only re-run failures that break the intent come back as `verified`. Merge verified findings that share a root cause, then write the Output section. Report `rejected` as the dropped count and reasons. An adversary with `inconclusive` set never attacked the change. When `inconclusive` is true for the whole run, report the run as inconclusive with each reason, never as "no verified findings". After you report, remove the run's worktrees with `git worktree remove --force` on each path under `.claude/worktrees/` whose name starts with the run ID, then `git worktree prune`.
+
 Adversaries try to break a change or a design. A finding survives only when a run proves it. Report the findings. Do not apply fixes.
 
 ## Frame
